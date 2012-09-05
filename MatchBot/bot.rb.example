@@ -1,0 +1,28 @@
+require './MatchBot.rb'
+
+while ( true )
+	# Define server
+	bot = MatchBot::MatchBot.new( 
+		"irc.de.quakenet.org", 
+		6667, 
+		nil, 
+		"nick", 
+		"ident", 
+		"realname",
+		"#channel",
+		"bind ip or nil"
+	)
+	
+	begin
+		bot.connect()
+		bot.wait()
+	
+	rescue => e
+		puts "## Exception:"
+		puts e.to_s
+		
+	end
+	
+	puts "## Reconnecting in 20s..."
+	sleep( 20 );
+end
