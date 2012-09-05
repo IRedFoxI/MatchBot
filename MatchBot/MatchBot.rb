@@ -160,6 +160,7 @@ module MatchBot
 		def joinChan( id, sender, type, parameter )
 			return if ( type == :event_type_before )
 			return if ( parameter.source == sender.myClient )
+			return if ( parameter.channel.name == @pubchannel )
 			
 			sleep( 0.5 )
 
