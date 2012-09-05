@@ -9,7 +9,9 @@ while ( true )
 		"nick", 
 		"ident", 
 		"realname",
-		"#channel",
+		"#privchannel",
+		"key",
+		"#pubchannel",
 		"bind ip or nil"
 	)
 	

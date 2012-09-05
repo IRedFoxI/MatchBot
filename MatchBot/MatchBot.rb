@@ -12,13 +12,15 @@ module MatchBot
 	
 	class MatchBot
 	
-		def initialize( host, port, password, nick, ident, realName, channel, bind = nil )
+		def initialize( host, port, password, nick, ident, realName, privchannel, key, pubchannel, bind = nil )
 			@irc = Kesh::IRC::Server.new( host, port, password, nick, ident, realName, bind )
 			@irc.events.addCallback( :eventRegister, self.method( "startup" ) )
 			@irc.events.addCallback( :eventPrivMsg, self.method( "parseMessage" ) )
 			@irc.events.addCallback( :eventJoin, self.method( "joinChan" ) )
 			@sorter = Kesh::DataStructures::Sort::MergeSort.new( DateComparer.new )
-			@channel = channel;
+			@privchannel = privchannel;
+			@key = key;
+			@pubchannel = pubchannel;
 			loadData()
 		end
 		
@@ -37,7 +39,8 @@ module MatchBot
 		
 		def startup( id, sender, type, parameter )
 			return if ( type == :event_type_before )	
-			@irc.send( Kesh::IRC::Commands::JoinCommand.new( @irc.getChannelByName( @channel ) ) )
+			@irc.send( Kesh::IRC::Commands::JoinCommand.new( @irc.getChannelByName( @privchannel ), @key  ) )
+			@irc.send( Kesh::IRC::Commands::JoinCommand.new( @irc.getChannelByName( @pubchannel ) ) )
 		end
 		
 		

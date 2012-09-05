@@ -19,7 +19,7 @@ module Kesh
 				
 
 				def format
-					return "JOIN #{@channel.name} #{@key}" if ( @key != nil && key != "" )
+					return "JOIN #{@channel.name} #{@key}" if ( @key != nil && @key != "" )
 					return "JOIN #{@channel.name}"
 				end
 				
