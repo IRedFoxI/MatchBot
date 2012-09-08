@@ -51,105 +51,117 @@ module MatchBot
 		def parseMessage( id, sender, type, parameter )
 			return if ( type == :event_type_before )
 
-			if ( parameter.message[ /^!help( .*)?$/ ] )
-				if ( parameter.message[ /^!help !?([^ ]+)$/ ] )
-					helpCommand( parameter, $1 )
-				else
-					help( parameter )
-				end
+			if ( parameter.target.name == @privchannel || ( !( parameter.target.name.start_with? "#" ) && ( parameter.source.inChannel?( @irc.getChannelByName( @privchannel ) ) ) ) )
 
-			elsif ( parameter.message[ /^!add( .*)?$/ ] )
-				if ( parameter.message[ /^!add (\d\d?\/\d\d?\/\d\d \d\d?:\d\d) ([^ ]+) ([^ ]+)( (.*))?/ ] )
-					addCommand( parameter, $1, $2, $3, $5 )
-				else
-					addHelp( parameter )
-				end
+                if ( parameter.message[ /^!help( .*)?$/ ] )
+                    if ( parameter.message[ /^!help !?([^ ]+)$/ ] )
+                        helpCommand( parameter, $1 )
+                    else
+                        help( parameter )
+                    end
 
-			elsif ( parameter.message[ /^!(yes|maybe|no|unsign)( .*)?$/ ] )
-				if ( parameter.message[ /^!(yes|maybe|no|unsign) (\d+)( ([^ ]+))?$/ ] )
-					signupCommand( parameter, $1, $2, $4 )
-				else
-					signupHelp( parameter )
-				end
+                elsif ( parameter.message[ /^!add( .*)?$/ ] )
+                    if ( parameter.message[ /^!add (\d\d?\/\d\d?\/\d\d \d\d?:\d\d) ([^ ]+) ([^ ]+)( (.*))?/ ] )
+                        addCommand( parameter, $1, $2, $3, $5 )
+                    else
+                        addHelp( parameter )
+                    end
 
-			elsif ( parameter.message[ /^([!@])list( .*)?$/ ] )
-				if ( parameter.message[ /^([!@])list( ([^ ]+))?( ([^ ]+))?/ ] )
-					listCommand( parameter, ( $1 == "@" ), $3, $5 )
-				else
-					listHelp( parameter )
-				end
+                elsif ( parameter.message[ /^!(yes|maybe|no|unsign)( .*)?$/ ] )
+                    if ( parameter.message[ /^!(yes|maybe|no|unsign) (\d+)( ([^ ]+))?$/ ] )
+                        signupCommand( parameter, $1, $2, $4 )
+                    else
+                        signupHelp( parameter )
+                    end
 
-			elsif ( parameter.message[ /^([!@])info( .*)?$/ ] )
-				if ( parameter.message[ /^([!@])info (\d+)( ([^ ]+))?/ ] )
-					infoCommand( parameter, ( $1 == "@" ), $2, $4 )
-				else
-					infoHelp( parameter )
-				end
+                elsif ( parameter.message[ /^([!@])list( .*)?$/ ] )
+                    if ( parameter.message[ /^([!@])list( ([^ ]+))?( ([^ ]+))?/ ] )
+                        listCommand( parameter, ( $1 == "@" ), $3, $5 )
+                    else
+                        listHelp( parameter )
+                    end
 
-			elsif ( parameter.message[ /^!update( .*)?$/ ] )
-				if ( parameter.message[ /^!update (\d+) ([^ ]+)( (([^ ]+).*))?$/ ] )
-					updateCommand( parameter, $1, $2, $5, $4 )
-				else
-					updateHelp( parameter )
-				end
+                elsif ( parameter.message[ /^([!@])info( .*)?$/ ] )
+                    if ( parameter.message[ /^([!@])info (\d+)( ([^ ]+))?/ ] )
+                        infoCommand( parameter, ( $1 == "@" ), $2, $4 )
+                    else
+                        infoHelp( parameter )
+                    end
 
-			elsif ( parameter.message[ /^!result( .*)?$/ ] )
-				if ( parameter.message[ /^!result (\d+) ([^ ]+) ([^ ]+) (\d+) (\d+)( (.*))?$/ ] )
-					resultCommand( parameter, $1, $2, $3, $4, $5, $7 )
-				else
-					resultHelp( parameter )
-				end
+                elsif ( parameter.message[ /^!update( .*)?$/ ] )
+                    if ( parameter.message[ /^!update (\d+) ([^ ]+)( (([^ ]+).*))?$/ ] )
+                        updateCommand( parameter, $1, $2, $5, $4 )
+                    else
+                        updateHelp( parameter )
+                    end
 
-			elsif ( parameter.message[ /^!updateresult( .*)?$/ ] )
-				if ( parameter.message[ /^!updateresult (\d+) (\d+) ([^ ]+)( (([^ ]+).*))?$/ ] )
-					updateResultCommand( parameter, $1, $2, $3, $6, $5 )
-				else
-					updateResultHelp( parameter )
-				end
+                elsif ( parameter.message[ /^!result( .*)?$/ ] )
+                    if ( parameter.message[ /^!result (\d+) ([^ ]+) ([^ ]+) (\d+) (\d+)( (.*))?$/ ] )
+                        resultCommand( parameter, $1, $2, $3, $4, $5, $7 )
+                    else
+                        resultHelp( parameter )
+                    end
 
-			elsif ( parameter.message[ /^!delresult( .*)?$/ ] )
-				if ( parameter.message[ /^!delresult (\d+) (\d+)$/ ] )
-					delResultCommand( parameter, $1, $2 )
-				else
-					delResultHelp( parameter )
-				end
+                elsif ( parameter.message[ /^!updateresult( .*)?$/ ] )
+                    if ( parameter.message[ /^!updateresult (\d+) (\d+) ([^ ]+)( (([^ ]+).*))?$/ ] )
+                        updateResultCommand( parameter, $1, $2, $3, $6, $5 )
+                    else
+                        updateResultHelp( parameter )
+                    end
 
-			elsif ( parameter.message[ /^!del( .*)?$/ ] )
-				if ( parameter.message[ /^!del (\d+)$/ ] )
-					delCommand( parameter, $1 )
-				else
-					delHelp( parameter )
-				end
+                elsif ( parameter.message[ /^!delresult( .*)?$/ ] )
+                    if ( parameter.message[ /^!delresult (\d+) (\d+)$/ ] )
+                        delResultCommand( parameter, $1, $2 )
+                    else
+                        delResultHelp( parameter )
+                    end
 
-			elsif ( parameter.message[ /^!undel( .*)?$/ ] )
-				if ( parameter.message[ /^!undel (\d+)$/ ] )
-					undelCommand( parameter, $1 )
-				else
-					undelHelp( parameter )
-				end
+                elsif ( parameter.message[ /^!del( .*)?$/ ] )
+                    if ( parameter.message[ /^!del (\d+)$/ ] )
+                        delCommand( parameter, $1 )
+                    else
+                        delHelp( parameter )
+                    end
 
-			elsif ( parameter.message[ /^!rename( .*)?$/ ] )
-				if ( parameter.message[ /^!rename (\d+) ([^ ]+) ([^ ]+)$/ ] )
-					renameCommand( parameter, $1, $2, $3 )
-				else
-					renameHelp( parameter )
-				end
+                elsif ( parameter.message[ /^!undel( .*)?$/ ] )
+                    if ( parameter.message[ /^!undel (\d+)$/ ] )
+                        undelCommand( parameter, $1 )
+                    else
+                        undelHelp( parameter )
+                    end
 
-			elsif ( parameter.message[ /^!alias( .*)?$/ ] )
-				if ( parameter.message[ /^!alias ([^ ]+) ([^ ]+)$/ ] )
-					aliasCommand( parameter, $1, $2 )
-				else
-					aliasHelp( parameter )
-				end
+                elsif ( parameter.message[ /^!rename( .*)?$/ ] )
+                    if ( parameter.message[ /^!rename (\d+) ([^ ]+) ([^ ]+)$/ ] )
+                        renameCommand( parameter, $1, $2, $3 )
+                    else
+                        renameHelp( parameter )
+                    end
 
-			elsif ( parameter.message[ /^!delalias( .*)?$/ ] )
-				if ( parameter.message[ /^!delalias ([^ ]+)$/ ] )
-					delAliasCommand( parameter, $1 )
-				else
-					delAliasHelp( parameter )
-				end
+                elsif ( parameter.message[ /^!alias( .*)?$/ ] )
+                    if ( parameter.message[ /^!alias ([^ ]+) ([^ ]+)$/ ] )
+                        aliasCommand( parameter, $1, $2 )
+                    else
+                        aliasHelp( parameter )
+                    end
+
+                elsif ( parameter.message[ /^!delalias( .*)?$/ ] )
+                    if ( parameter.message[ /^!delalias ([^ ]+)$/ ] )
+                        delAliasCommand( parameter, $1 )
+                    else
+                        delAliasHelp( parameter )
+                    end
+
+                end
 
 			end
+
+			if ( parameter.target.name == @pubchannel )
+                if ( parameter.message[ /^[!@][^ ]+/ ] )
+                    sendNotice( parameter.server, parameter.source, "[Error] public channel commands not yet implemented." )
+                end
+				return
+			end
+
 		end
 
 
@@ -563,11 +575,6 @@ module MatchBot
 		def listCommand( privMsgEvent, publicResponse, param1, param2 )
 			if ( publicResponse )
 				publicResponse = publicResponse && ( privMsgEvent.target.name.start_with? "#" )
-			end
-
-			if ( publicResponse && ( privMsgEvent.target.name == @pubchannel ) )
-                sendNotice( privMsgEvent.server, privMsgEvent.source, "[Error] Listing of matches in public channel not yet implemented." )
-				return
 			end
 
 			unsigned = false
