@@ -51,7 +51,7 @@ module MatchBot
 		def parseMessage( id, sender, type, parameter )
 			return if ( type == :event_type_before )
 
-			if ( parameter.target.name == @privchannel || ( !( parameter.target.name.start_with? "#" ) && ( parameter.source.inChannel?( @irc.getChannelByName( @privchannel ) ) ) ) )
+			if ( parameter.source.inChannel?( @irc.getChannelByName( @privchannel ) ) )
 
                 if ( parameter.message[ /^!help( .*)?$/ ] )
                     if ( parameter.message[ /^!help !?([^ ]+)$/ ] )
@@ -153,13 +153,31 @@ module MatchBot
 
                 end
 
-			end
+			else
+                if ( parameter.message[ /^!help( .*)?$/ ] )
+                    if ( parameter.message[ /^!help !?([^ ]+)$/ ] )
+                        if ( $1 == "list" )
+                            listPubHelp( parameter )
+                        end
+                    else
+                        sendNotice( parameter.server, parameter.source, "[Help] Available commands: !list - Use !help <command> for more information." )
+                    end
 
-			if ( parameter.target.name == @pubchannel )
-                if ( parameter.message[ /^[!@][^ ]+/ ] )
-                    sendNotice( parameter.server, parameter.source, "[Error] public channel commands not yet implemented." )
+#                elsif ( parameter.message[ /^!add( .*)?$/ ] )
+#                    if ( parameter.message[ /^!add (\d\d?\/\d\d?\/\d\d \d\d?:\d\d) ([^ ]+) ([^ ]+)( (.*))?/ ] )
+#                        addCommand( parameter, $1, $2, $3, $5 )
+#                    else
+#                        addHelp( parameter )
+#                    end
+
+                elsif ( parameter.message[ /^([!@])list( .*)?$/ ] )
+                    if ( parameter.message[ /^([!@])list( ([^ ]+))?( ([^ ]+))?/ ] )
+                        listPubCommand( parameter, ( $1 == "@" ) )
+                    else
+                        listPubHelp( parameter )
+                    end
                 end
-				return
+
 			end
 
 		end
@@ -247,10 +265,10 @@ module MatchBot
 				listHelp( privMsgEvent )
 
 			elsif ( command == "info" )
-				listHelp( privMsgEvent )
+				infoHelp( privMsgEvent )
 
 			elsif ( command == "update" )
-				listHelp( privMsgEvent )
+				updateHelp( privMsgEvent )
 
 			elsif ( command == "result" )
 				resultHelp( privMsgEvent )
@@ -286,6 +304,11 @@ module MatchBot
 
 		def listHelp( privMsgEvent )
 			sendNotice( privMsgEvent.server, privMsgEvent.source, "[Help] !list [unsigned] [name] - List the upcoming matches.  If you include 'unsigned', it will only show the matches you aren't signed up for.  If you include a name, that name will be used instead of your IRC nick to check for availability." )
+		end
+
+
+		def listPubHelp( privMsgEvent )
+			sendNotice( privMsgEvent.server, privMsgEvent.source, "[Help] !list - List the upcoming matches." )
 		end
 
 
@@ -632,9 +655,56 @@ module MatchBot
 		end
 
 
+		def listPubCommand( privMsgEvent, publicResponse )
+			if ( publicResponse )
+				publicResponse = publicResponse && ( privMsgEvent.target.name.start_with? "#" )
+			end
+
+			name = privMsgEvent.source.name
+
+			listed = 0
+
+			@matches.each { |match|
+				next if ( match.deleted )
+
+				date = getDateString( match.date )
+
+				comment = ""
+				comment = " :: #{match.comment}" if ( match.comment != nil && match.comment.length > 0 )
+
+				yes = "3#{match.yes.length}"
+				maybe = "7#{match.maybe.length}"
+				no = "4#{match.no.length}"
+
+				played = ""
+				played = " :: #{match.results.length} map(s) played" if ( match.results.length > 0 )
+
+				if ( publicResponse )
+					sendMessage( privMsgEvent.server, privMsgEvent.target, "[Info] #{match.id}: #{date} AMS :: #{match.gametype} vs #{match.team}#{comment}#{played} :: #{yes}/#{maybe}/#{no}" )
+				else
+					sendNotice( privMsgEvent.server, privMsgEvent.source, "[Info] #{match.id}: #{date} AMS :: #{match.gametype} vs #{match.team}#{comment}#{played} :: #{yes}/#{maybe}/#{no}" )
+				end
+
+				listed = listed + 1
+			}
+
+			if ( listed == 0 )
+				if ( publicResponse )
+					sendMessage( privMsgEvent.server, privMsgEvent.target, "[Info] No matches." )
+				else
+					sendNotice( privMsgEvent.server, privMsgEvent.source, "[Info] No matches." )
+				end
+			end
+		end
+
+
 		def infoCommand( privMsgEvent, publicResponse, indexStr, nameParam )
 			if ( publicResponse )
 				publicResponse = publicResponse && ( privMsgEvent.target.name.start_with? "#" )
+				if ( privMsgEvent.target.name == @pubchannel )
+                    sendNotice( privMsgEvent.server, privMsgEvent.source, "[Error] Info command not available in public channel." )
+                    return
+                end
 			end
 
 			name = privMsgEvent.source.name
